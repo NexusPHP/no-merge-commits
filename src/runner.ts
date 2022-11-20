@@ -1,13 +1,22 @@
-import { getInput, info, error } from '@actions/core'
+import { getInput } from '@actions/core'
 import { context, getOctokit } from '@actions/github'
+import { log, inflect } from './util'
 
 export async function runner(): Promise<void> {
+  log('Collecting token from input...', 'notice')
   const token = getInput('token', { required: true })
+  log('Token collected.', 'info')
+
+  log('Instantiating an Octokit client using token...', 'notice')
   const client = getOctokit(token)
-  const pull = context.issue.number
+  log('Octokit client is ready.', 'info')
 
-  info(`Retrieving commits of PR #${pull}.`)
+  const { owner, repo, number } = context.issue
+  log(`Looking up owner: ${owner}`, 'notice')
+  log(`Looking up repository: ${repo}`, 'notice')
+  log(`Looking up pull request number: ${number}`, 'notice')
 
+  log(`Retrieving commits of [PR #${number}](https://github.com/${owner}/${repo}/pulls/${number})...`, 'notice')
   const { data: commits, status } = await client.rest.pulls.listCommits({
     ...context.repo,
     pull_number: context.issue.number,
@@ -17,13 +26,15 @@ export async function runner(): Promise<void> {
     throw new Error(`Retrieving the commits of the pull request failed with HTTP ${status} status code.`)
   }
 
-  info(`${commits.length} commits(s) found in this pull request.`)
+  log(`PR #${number} contains ${commits.length} ${await inflect(commits, 'commit.', 'commits.')}`, 'info')
 
   let mergeCommits = 0
 
   for (const { sha, html_url, parents } of commits) {
+    log(`Inspecting commit SHA: ${sha}`, 'notice')
+
     if (parents.length > 1) {
-      error(`Commit SHA [${sha}](${html_url}) is a merge commit!`)
+      log(`Commit SHA [${sha}](${html_url}) is a merge commit!`, 'error')
       mergeCommits++
     }
   }
@@ -32,5 +43,5 @@ export async function runner(): Promise<void> {
     throw new Error('Merge commits were found in this pull request.')
   }
 
-  info('No merge commits found in this pull request.')
+  log('No merge commits found in this pull request.', 'info')
 }

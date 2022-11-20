@@ -1,10 +1,15 @@
-import { setFailed } from '@actions/core'
+import { ExitCode } from '@actions/core'
 import { runner } from './runner'
+import { log } from './util'
 
-try {
-  runner()
-} catch (error: unknown) {
-  if (error instanceof Error) {
-    setFailed(`Error: ${error.message}`)
+/** Runner */
+;(async () => {
+  try {
+    await runner()
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      process.exitCode = ExitCode.Failure
+      log(error.message, 'error')
+    }
   }
-}
+})()
