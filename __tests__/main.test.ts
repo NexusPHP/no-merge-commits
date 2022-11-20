@@ -71,7 +71,7 @@ describe('nexusphp/no-merge-commits main', () => {
       '\x1B[37m[NOTICE] Looking up owner: me\x1B[0m',
       '\x1B[37m[NOTICE] Looking up repository: awesome\x1B[0m',
       '\x1B[37m[NOTICE] Looking up pull request number: 1\x1B[0m',
-      '\x1B[37m[NOTICE] Retrieving commits of \x1B]8;;https://github.com/me/awesome/pull/1\x1B\\PR #1\x1B]8;;\x1B\\...\x1B[0m',
+      '\x1B[37m[NOTICE] Retrieving commits of PR #1...\x1B[0m',
     ])
   })
 
@@ -115,7 +115,7 @@ describe('nexusphp/no-merge-commits main', () => {
       '\x1B[37m[NOTICE] Looking up owner: me\x1B[0m',
       '\x1B[37m[NOTICE] Looking up repository: awesome\x1B[0m',
       '\x1B[37m[NOTICE] Looking up pull request number: 1\x1B[0m',
-      '\x1B[37m[NOTICE] Retrieving commits of \x1B]8;;https://github.com/me/awesome/pull/1\x1B\\PR #1\x1B]8;;\x1B\\...\x1B[0m',
+      '\x1B[37m[NOTICE] Retrieving commits of PR #1...\x1B[0m',
       '\x1B[32m[INFO] PR #1 contains 1 commit.\x1B[0m',
       '\x1B[37m[NOTICE] Inspecting commit SHA: 819a33b\x1B[0m',
       '\x1B[32m[INFO] No merge commits found in this pull request.\x1B[0m',
@@ -167,10 +167,10 @@ describe('nexusphp/no-merge-commits main', () => {
       '\x1B[37m[NOTICE] Looking up owner: me\x1B[0m',
       '\x1B[37m[NOTICE] Looking up repository: awesome\x1B[0m',
       '\x1B[37m[NOTICE] Looking up pull request number: 1\x1B[0m',
-      '\x1B[37m[NOTICE] Retrieving commits of \x1B]8;;https://github.com/me/awesome/pull/1\x1B\\PR #1\x1B]8;;\x1B\\...\x1B[0m',
+      '\x1B[37m[NOTICE] Retrieving commits of PR #1...\x1B[0m',
       '\x1B[32m[INFO] PR #1 contains 1 commit.\x1B[0m',
       '\x1B[37m[NOTICE] Inspecting commit SHA: 819a33b\x1B[0m',
-      '\x1B[31m[ERROR] Commit SHA \x1B]8;;https://some.place\x1B\\819a33b\x1B]8;;\x1B\\ is a merge commit!\x1B[0m',
+      '\x1B[31m[ERROR] Commit SHA 819a33b is a merge commit!\x1B[0m',
     ])
   })
 })

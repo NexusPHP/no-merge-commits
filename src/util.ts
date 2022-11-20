@@ -20,10 +20,6 @@ export async function color(type: string): Promise<string> {
   }
 }
 
-export async function linkify(text: string, url: string): Promise<string> {
-  return `\x1B]8;;${url}\x1B\\${text}\x1B]8;;\x1B\\`
-}
-
 export async function log(message: string, type: string): Promise<void> {
   info(`${await color(type)}[${type.toUpperCase()}] ${message}${await color('reset')}`)
 }

@@ -1,6 +1,6 @@
 import { getInput } from '@actions/core'
 import { context, getOctokit } from '@actions/github'
-import { inflect, linkify, log } from './util'
+import { inflect, log } from './util'
 
 export async function runner(): Promise<void> {
   log('Collecting token from input...', 'notice')
@@ -16,8 +16,7 @@ export async function runner(): Promise<void> {
   log(`Looking up repository: ${repo}`, 'notice')
   log(`Looking up pull request number: ${number}`, 'notice')
 
-  const url = `https://github.com/${owner}/${repo}/pull/${number}`
-  log(`Retrieving commits of ${await linkify(`PR #${number}`, url)}...`, 'notice')
+  log(`Retrieving commits of PR #${number}...`, 'notice')
 
   const { data: commits, status } = await client.rest.pulls.listCommits({
     owner,
@@ -33,13 +32,13 @@ export async function runner(): Promise<void> {
 
   let mergeCommits = 0
 
-  for (const { sha, html_url, parents } of commits) {
+  for (const { sha, parents } of commits) {
     const shortSha = sha.substring(0, 7)
 
     log(`Inspecting commit SHA: ${shortSha}`, 'notice')
 
     if (parents.length > 1) {
-      log(`Commit SHA ${await linkify(shortSha, html_url)} is a merge commit!`, 'error')
+      log(`Commit SHA ${shortSha} is a merge commit!`, 'error')
 
       mergeCommits++
     }

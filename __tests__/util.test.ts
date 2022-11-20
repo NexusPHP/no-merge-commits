@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, jest, test } from '@jest/globals'
 import { EOL } from 'os'
-import { color, log, inflect, linkify } from '../src/util'
+import { color, log, inflect } from '../src/util'
 
 describe('nexusphp/no-merge-commits util', () => {
   beforeEach(() => {
@@ -19,10 +19,6 @@ describe('nexusphp/no-merge-commits util', () => {
     await expect(color('notice')).resolves.toBe('\x1B[37m')
     await expect(color('warning')).resolves.toBe('\x1B[33m')
     await expect(color('other')).resolves.toBe('\x1B[32m')
-  })
-
-  test('linkify gives proper linking', async () => {
-    await expect(linkify('Some', 'https://some.place')).resolves.toBe('\x1B]8;;https://some.place\x1B\\Some\x1B]8;;\x1B\\')
   })
 
   test('log gives correct log message', async () => {
