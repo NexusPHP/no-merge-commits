@@ -22,7 +22,7 @@ async function runner() {
     (0, util_1.log)(`Looking up owner: ${owner}`, 'notice');
     (0, util_1.log)(`Looking up repository: ${repo}`, 'notice');
     (0, util_1.log)(`Looking up pull request number: ${number}`, 'notice');
-    (0, util_1.log)(`Retrieving commits of [PR #${number}](https://github.com/${owner}/${repo}/pulls/${number})...`, 'notice');
+    (0, util_1.log)(`Retrieving commits of [PR #${number}](https://github.com/${owner}/${repo}/pull/${number})...`, 'notice');
     const { data: commits, status } = await client.rest.pulls.listCommits({
         ...github_1.context.repo,
         pull_number: github_1.context.issue.number,
