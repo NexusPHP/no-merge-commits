@@ -10,11 +10,19 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.runner = void 0;
 const core_1 = __nccwpck_require__(2186);
 const github_1 = __nccwpck_require__(5438);
+const util_1 = __nccwpck_require__(4024);
 async function runner() {
+    (0, util_1.log)('Collecting token from input...', 'notice');
     const token = (0, core_1.getInput)('token', { required: true });
+    (0, util_1.log)('Token collected.', 'info');
+    (0, util_1.log)('Instantiating an Octokit client using token...', 'notice');
     const client = (0, github_1.getOctokit)(token);
-    const pull = github_1.context.issue.number;
-    (0, core_1.info)(`Retrieving commits of PR #${pull}.`);
+    (0, util_1.log)('Octokit client is ready.', 'info');
+    const { owner, repo, number } = github_1.context.issue;
+    (0, util_1.log)(`Looking up owner: ${owner}`, 'notice');
+    (0, util_1.log)(`Looking up repository: ${repo}`, 'notice');
+    (0, util_1.log)(`Looking up pull request number: ${number}`, 'notice');
+    (0, util_1.log)(`Retrieving commits of [PR #${number}](https://github.com/${owner}/${repo}/pulls/${number})...`, 'notice');
     const { data: commits, status } = await client.rest.pulls.listCommits({
         ...github_1.context.repo,
         pull_number: github_1.context.issue.number,
@@ -22,20 +30,57 @@ async function runner() {
     if (status !== 200) {
         throw new Error(`Retrieving the commits of the pull request failed with HTTP ${status} status code.`);
     }
-    (0, core_1.info)(`${commits.length} commits(s) found in this pull request.`);
+    (0, util_1.log)(`PR #${number} contains ${commits.length} ${await (0, util_1.inflect)(commits, 'commit.', 'commits.')}`, 'info');
     let mergeCommits = 0;
     for (const { sha, html_url, parents } of commits) {
+        (0, util_1.log)(`Inspecting commit SHA: ${sha}`, 'notice');
         if (parents.length > 1) {
-            (0, core_1.error)(`Commit SHA [${sha}](${html_url}) is a merge commit!`);
+            (0, util_1.log)(`Commit SHA [${sha}](${html_url}) is a merge commit!`, 'error');
             mergeCommits++;
         }
     }
     if (mergeCommits > 0) {
         throw new Error('Merge commits were found in this pull request.');
     }
-    (0, core_1.info)('No merge commits found in this pull request.');
+    (0, util_1.log)('No merge commits found in this pull request.', 'info');
 }
 exports.runner = runner;
+
+
+/***/ }),
+
+/***/ 4024:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.inflect = exports.log = exports.color = void 0;
+const core_1 = __nccwpck_require__(2186);
+async function color(type) {
+    switch (type) {
+        case 'error':
+            return '\x1B[31m';
+        case 'warning':
+            return '\x1B[33m';
+        case 'notice':
+            return '\x1B[37m';
+        case 'reset':
+            return '\x1B[0m';
+        case 'info':
+        default:
+            return '\x1B[32m';
+    }
+}
+exports.color = color;
+async function log(message, type) {
+    (0, core_1.info)(`${await color(type)}[${type.toUpperCase()}] ${message}${await color('reset')}`);
+}
+exports.log = log;
+async function inflect(iterable, singular, plural) {
+    return (iterable.length > 1 && plural) || singular;
+}
+exports.inflect = inflect;
 
 
 /***/ }),
@@ -9729,14 +9774,18 @@ var exports = __webpack_exports__;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core_1 = __nccwpck_require__(2186);
 const runner_1 = __nccwpck_require__(8209);
-try {
-    (0, runner_1.runner)();
-}
-catch (error) {
-    if (error instanceof Error) {
-        (0, core_1.setFailed)(`Error: ${error.message}`);
+const util_1 = __nccwpck_require__(4024);
+(async () => {
+    try {
+        await (0, runner_1.runner)();
     }
-}
+    catch (error) {
+        if (error instanceof Error) {
+            process.exitCode = core_1.ExitCode.Failure;
+            (0, util_1.log)(error.message, 'error');
+        }
+    }
+})();
 
 })();
 
