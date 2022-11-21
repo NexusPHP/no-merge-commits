@@ -19,9 +19,9 @@ async function runner() {
     const client = (0, github_1.getOctokit)(token);
     (0, util_1.log)('Octokit client is ready.', 'info');
     const { owner, repo, number } = github_1.context.issue;
-    (0, util_1.log)(`Looking up owner: ${owner}`, 'notice');
-    (0, util_1.log)(`Looking up repository: ${repo}`, 'notice');
-    (0, util_1.log)(`Looking up pull request number: ${number}`, 'notice');
+    (0, util_1.log)(`Looking up owner: ${owner}`, 'debug');
+    (0, util_1.log)(`Looking up repository: ${repo}`, 'debug');
+    (0, util_1.log)(`Looking up pull request number: ${number}`, 'debug');
     (0, util_1.log)(`Retrieving commits of PR #${number}...`, 'notice');
     const { data: commits, status } = await client.rest.pulls.listCommits({
         owner,
@@ -52,19 +52,43 @@ exports.runner = runner;
 /***/ }),
 
 /***/ 4024:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.inflect = exports.log = exports.color = void 0;
-const core_1 = __nccwpck_require__(2186);
+const core = __importStar(__nccwpck_require__(2186));
 async function color(type) {
     switch (type) {
         case 'error':
             return '\x1B[31m';
         case 'warning':
             return '\x1B[33m';
+        case 'debug':
         case 'notice':
             return '\x1B[37m';
         case 'reset':
@@ -76,7 +100,22 @@ async function color(type) {
 }
 exports.color = color;
 async function log(message, type) {
-    (0, core_1.info)(`${await color(type)}[${type.toUpperCase()}] ${message}${await color('reset')}`);
+    let callable;
+    switch (type) {
+        case 'debug':
+            callable = core.debug;
+            break;
+        case 'notice':
+            callable = core.notice;
+            break;
+        case 'error':
+            callable = core.error;
+            break;
+        case 'info':
+        default:
+            callable = core.info;
+    }
+    callable(`${await color(type)}[${type.toUpperCase()}] ${message}${await color('reset')}`);
 }
 exports.log = log;
 async function inflect(iterable, singular, plural) {
