@@ -105,12 +105,10 @@ async function log(message, type) {
         case 'debug':
             callable = core.debug;
             break;
-        case 'notice':
-            callable = core.notice;
-            break;
         case 'error':
             callable = core.error;
             break;
+        case 'notice':
         case 'info':
         default:
             callable = core.info;
