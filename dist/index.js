@@ -8,9 +8,9 @@ require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.runner = void 0;
-const core_1 = __nccwpck_require__(2186);
 const github_1 = __nccwpck_require__(5438);
 const util_1 = __nccwpck_require__(4024);
+const core_1 = __nccwpck_require__(2186);
 async function runner() {
     (0, util_1.log)('Collecting token from input...', 'notice');
     const token = (0, core_1.getInput)('token', { required: true });
@@ -22,9 +22,10 @@ async function runner() {
     (0, util_1.log)(`Looking up owner: ${owner}`, 'notice');
     (0, util_1.log)(`Looking up repository: ${repo}`, 'notice');
     (0, util_1.log)(`Looking up pull request number: ${number}`, 'notice');
-    (0, util_1.log)(`Retrieving commits of [PR #${number}](https://github.com/${owner}/${repo}/pull/${number})...`, 'notice');
+    (0, util_1.log)(`Retrieving commits of PR #${number}...`, 'notice');
     const { data: commits, status } = await client.rest.pulls.listCommits({
-        ...github_1.context.repo,
+        owner,
+        repo,
         pull_number: github_1.context.issue.number,
     });
     if (status !== 200) {
@@ -32,10 +33,11 @@ async function runner() {
     }
     (0, util_1.log)(`PR #${number} contains ${commits.length} ${await (0, util_1.inflect)(commits, 'commit.', 'commits.')}`, 'info');
     let mergeCommits = 0;
-    for (const { sha, html_url, parents } of commits) {
-        (0, util_1.log)(`Inspecting commit SHA: ${sha}`, 'notice');
+    for (const { sha, parents } of commits) {
+        const shortSha = sha.substring(0, 7);
+        (0, util_1.log)(`Inspecting commit SHA: ${shortSha}`, 'notice');
         if (parents.length > 1) {
-            (0, util_1.log)(`Commit SHA [${sha}](${html_url}) is a merge commit!`, 'error');
+            (0, util_1.log)(`Commit SHA ${shortSha} is a merge commit!`, 'error');
             mergeCommits++;
         }
     }
@@ -9773,8 +9775,8 @@ var exports = __webpack_exports__;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core_1 = __nccwpck_require__(2186);
-const runner_1 = __nccwpck_require__(8209);
 const util_1 = __nccwpck_require__(4024);
+const runner_1 = __nccwpck_require__(8209);
 (async () => {
     try {
         await (0, runner_1.runner)();
