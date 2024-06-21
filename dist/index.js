@@ -7,7 +7,7 @@ require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.runner = void 0;
+exports.runner = runner;
 const github_1 = __nccwpck_require__(5438);
 const util_1 = __nccwpck_require__(4024);
 const core_1 = __nccwpck_require__(2186);
@@ -46,7 +46,6 @@ async function runner() {
     }
     (0, util_1.log)('No merge commits found in this pull request.', 'info');
 }
-exports.runner = runner;
 
 
 /***/ }),
@@ -80,7 +79,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.inflect = exports.log = exports.color = void 0;
+exports.color = color;
+exports.log = log;
+exports.inflect = inflect;
 const core = __importStar(__nccwpck_require__(2186));
 async function color(type) {
     switch (type) {
@@ -98,7 +99,6 @@ async function color(type) {
             return '\x1B[32m';
     }
 }
-exports.color = color;
 async function log(message, type) {
     let callable;
     switch (type) {
@@ -115,11 +115,9 @@ async function log(message, type) {
     }
     callable(`${await color(type)}[${type.toUpperCase()}] ${message}${await color('reset')}`);
 }
-exports.log = log;
 async function inflect(iterable, singular, plural) {
     return (iterable.length > 1 && plural) || singular;
 }
-exports.inflect = inflect;
 
 
 /***/ }),
