@@ -36,7 +36,7 @@ jobs:
 
 ```
 
-You'll also need to add a [required status check](1) rule for your
+You'll also need to add a [required status check][1] rule for your
 action to block merging if it detects merge commits.
 
 [1]: https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/managing-a-branch-protection-rule
