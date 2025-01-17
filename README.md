@@ -23,7 +23,7 @@ permissions:
 jobs:
   test:
     name: Check for merge commits
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout

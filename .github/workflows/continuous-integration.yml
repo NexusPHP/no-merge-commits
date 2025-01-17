@@ -15,7 +15,7 @@ permissions:
 jobs:
   unit-test:
     name: Unit Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout
@@ -43,7 +43,7 @@ jobs:
   integration-test:
     name: Integration Test
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout

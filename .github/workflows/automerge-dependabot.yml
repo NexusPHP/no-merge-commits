@@ -17,7 +17,7 @@ jobs:
   automerge:
     name: Enable Auto-Merge for Dependabot
     if: github.event.pull_request.user.login == 'dependabot[bot]' && github.actor == 'dependabot[bot]'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Approve Dependabot PR
