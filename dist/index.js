@@ -8,45 +8,43 @@ require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.runner = runner;
+const core_1 = __nccwpck_require__(7484);
 const github_1 = __nccwpck_require__(3228);
 const util_1 = __nccwpck_require__(7030);
-const core_1 = __nccwpck_require__(7484);
 async function runner() {
-    (0, util_1.log)('Collecting token from input...', 'notice');
-    const token = (0, core_1.getInput)('token', { required: true });
-    (0, util_1.log)('Token collected.', 'info');
-    (0, util_1.log)('Instantiating an Octokit client using token...', 'notice');
+    (0, util_1.log)("Collecting token from input...", "notice");
+    const token = (0, core_1.getInput)("token", { required: true });
+    (0, util_1.log)("Token collected.", "info");
+    (0, util_1.log)("Instantiating an Octokit client using token...", "notice");
     const client = (0, github_1.getOctokit)(token);
-    (0, util_1.log)('Octokit client is ready.', 'info');
+    (0, util_1.log)("Octokit client is ready.", "info");
     const { owner, repo, number } = github_1.context.issue;
-    (0, util_1.log)(`Looking up owner: ${owner}`, 'debug');
-    (0, util_1.log)(`Looking up repository: ${repo}`, 'debug');
-    (0, util_1.log)(`Looking up pull request number: ${number}`, 'debug');
-    (0, util_1.log)(`Retrieving commits of PR #${number}...`, 'notice');
+    (0, util_1.log)(`Looking up owner: ${owner}`, "debug");
+    (0, util_1.log)(`Looking up repository: ${repo}`, "debug");
+    (0, util_1.log)(`Looking up pull request number: ${number}`, "debug");
+    (0, util_1.log)(`Retrieving commits of PR #${number}...`, "notice");
     const { data: commits, status } = await client.rest.pulls.listCommits({
         owner,
         repo,
         pull_number: github_1.context.issue.number,
     });
-    if (status !== 200) {
-        throw new Error(`Retrieving the commits of the pull request failed with HTTP ${status} status code.`);
-    }
-    (0, util_1.log)(`PR #${number} contains ${commits.length} ${await (0, util_1.inflect)(commits, 'commit.', 'commits.')}`, 'info');
+    (0, util_1.log)(`HTTP Status: ${status}`, "info");
+    (0, util_1.log)(`PR #${number} contains ${commits.length} ${(0, util_1.inflect)(commits, "commit.", "commits.")}`, "info");
     let mergeCommits = 0;
     for (const { sha, parents } of commits) {
         const shortSha = sha.substring(0, 7);
-        (0, util_1.log)(`Inspecting commit SHA: ${shortSha}`, 'notice');
+        (0, util_1.log)(`Inspecting commit SHA: ${shortSha}`, "notice");
         if (parents.length > 1) {
-            (0, util_1.log)(`Commit SHA ${shortSha} is a merge commit!`, 'error');
+            (0, util_1.log)(`Commit SHA ${shortSha} is a merge commit!`, "error");
             mergeCommits++;
         }
     }
     if (mergeCommits > 0) {
-        throw new Error('Merge commits were found in this pull request.');
+        throw new Error("Merge commits were found in this pull request.");
     }
-    (0, util_1.log)('No merge commits found in this pull request.', 'info');
+    (0, util_1.log)("No merge commits found in this pull request.", "info");
 }
-
+//# sourceMappingURL=runner.js.map
 
 /***/ }),
 
@@ -93,42 +91,42 @@ exports.color = color;
 exports.log = log;
 exports.inflect = inflect;
 const core = __importStar(__nccwpck_require__(7484));
-async function color(type) {
+function color(type) {
     switch (type) {
-        case 'error':
-            return '\x1B[31m';
-        case 'warning':
-            return '\x1B[33m';
-        case 'debug':
-        case 'notice':
-            return '\x1B[37m';
-        case 'reset':
-            return '\x1B[0m';
-        case 'info':
+        case "error":
+            return "\x1B[31m";
+        case "warning":
+            return "\x1B[33m";
+        case "debug":
+        case "notice":
+            return "\x1B[37m";
+        case "reset":
+            return "\x1B[0m";
+        case "info":
         default:
-            return '\x1B[32m';
+            return "\x1B[32m";
     }
 }
-async function log(message, type) {
+function log(message, type) {
     let callable;
     switch (type) {
-        case 'debug':
+        case "debug":
             callable = core.debug;
             break;
-        case 'error':
+        case "error":
             callable = core.error;
             break;
-        case 'notice':
-        case 'info':
+        case "notice":
+        case "info":
         default:
             callable = core.info;
     }
-    callable(`${await color(type)}[${type.toUpperCase()}] ${message}${await color('reset')}`);
+    callable(`${color(type)}[${type.toUpperCase()}] ${message}${color("reset")}`);
 }
-async function inflect(iterable, singular, plural) {
+function inflect(iterable, singular, plural) {
     return (iterable.length > 1 && plural) || singular;
 }
-
+//# sourceMappingURL=util.js.map
 
 /***/ }),
 
@@ -31574,20 +31572,17 @@ var exports = __webpack_exports__;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core_1 = __nccwpck_require__(7484);
-const util_1 = __nccwpck_require__(7030);
 const runner_1 = __nccwpck_require__(1924);
-(async () => {
-    try {
-        await (0, runner_1.runner)();
-    }
-    catch (error) {
+const util_1 = __nccwpck_require__(7030);
+void (async () => {
+    await (0, runner_1.runner)().catch((error) => {
         if (error instanceof Error) {
             process.exitCode = core_1.ExitCode.Failure;
-            (0, util_1.log)(error.message, 'error');
+            (0, util_1.log)(error.message, "error");
         }
-    }
+    });
 })();
-
+//# sourceMappingURL=main.js.map
 })();
 
 module.exports = __webpack_exports__;

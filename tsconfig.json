@@ -1,19 +1,23 @@
 {
-    "compilerOptions": {
-        "target": "es2021",
-        "module": "commonjs",
-        "declaration": false,
-        "outDir": "lib",
-        "rootDir": "src",
-        "strict": true,
-        "noImplicitAny": true,
-        "esModuleInterop": true,
-        "forceConsistentCasingInFileNames": true
-    },
-    "exclude": [
-        "dist",
-        "node_modules",
-        "jest.config.ts",
-        "**/*.test.ts"
-    ]
+  "extends": "@octokit/tsconfig",
+  "compilerOptions": {
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "declaration": true,
+    "rootDir": "src",
+    "outDir": "lib",
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "lib": [
+      "ES2023",
+      "DOM"
+    ],
+    "skipLibCheck": true,
+    "verbatimModuleSyntax": false
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "compileOnSave": false
 }

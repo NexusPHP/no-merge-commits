@@ -1,34 +1,34 @@
-import { afterEach, beforeEach, describe, expect, jest, test } from '@jest/globals'
-import { color, inflect, log } from '../src/util'
-import { EOL } from 'os'
+import { afterEach, beforeEach, describe, expect, jest, test } from "@jest/globals";
+import { EOL } from "os";
+import { color, inflect, log } from "../src/util";
 
-describe('nexusphp/no-merge-commits util', () => {
-  beforeEach(() => {
-    jest.spyOn(process.stdout, 'write').mockImplementation(jest.fn<() => boolean>())
-  })
+describe("nexusphp/no-merge-commits util", () => {
+    beforeEach(() => {
+        jest.spyOn(process.stdout, "write").mockImplementation(jest.fn<() => boolean>());
+    });
 
-  afterEach(() => {
-    jest.restoreAllMocks()
-  })
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
 
-  test('color gives the correct type', async () => {
-    await expect(color('')).resolves.toBe('\x1B[32m')
-    await expect(color('info')).resolves.toBe('\x1B[32m')
-    await expect(color('error')).resolves.toBe('\x1B[31m')
-    await expect(color('reset')).resolves.toBe('\x1B[0m')
-    await expect(color('notice')).resolves.toBe('\x1B[37m')
-    await expect(color('warning')).resolves.toBe('\x1B[33m')
-    await expect(color('other')).resolves.toBe('\x1B[32m')
-  })
+    test("color gives the correct type", () => {
+        expect(color("")).toBe("\x1B[32m");
+        expect(color("info")).toBe("\x1B[32m");
+        expect(color("error")).toBe("\x1B[31m");
+        expect(color("reset")).toBe("\x1B[0m");
+        expect(color("notice")).toBe("\x1B[37m");
+        expect(color("warning")).toBe("\x1B[33m");
+        expect(color("other")).toBe("\x1B[32m");
+    });
 
-  test('log gives correct log message', async () => {
-    await log('Notice', 'info')
+    test("log gives correct log message", () => {
+        log("Notice", "info");
 
-    expect(process.stdout.write).toHaveBeenNthCalledWith(1, `\x1B[32m[INFO] Notice\x1B[0m${EOL}`)
-  })
+        expect(process.stdout.write).toHaveBeenNthCalledWith(1, `\x1B[32m[INFO] Notice\x1B[0m${EOL}`);
+    });
 
-  test('inflect gives the correct noun', async () => {
-    await expect(inflect(['a', 'b'], 'letter', 'letters')).resolves.toBe('letters')
-    await expect(inflect(['a'], 'letter', 'letters')).resolves.toBe('letter')
-  })
-})
+    test("inflect gives the correct noun", () => {
+        expect(inflect(["a", "b"], "letter", "letters")).toBe("letters");
+        expect(inflect(["a"], "letter", "letters")).toBe("letter");
+    });
+});
