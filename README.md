@@ -27,10 +27,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Run test
-        uses: NexusPHP/no-merge-commits@v2.2.0
+        uses: NexusPHP/no-merge-commits@v2.2.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
