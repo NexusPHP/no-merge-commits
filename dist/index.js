@@ -5278,7 +5278,7 @@ module.exports = __toCommonJS(dist_src_exports);
 var import_universal_user_agent = __nccwpck_require__(3843);
 
 // pkg/dist-src/version.js
-var VERSION = "9.0.1";
+var VERSION = "9.0.6";
 
 // pkg/dist-src/defaults.js
 var userAgent = `octokit-endpoint.js/${VERSION} ${(0, import_universal_user_agent.getUserAgent)()}`;
@@ -5305,12 +5305,24 @@ function lowercaseKeys(object) {
   }, {});
 }
 
+// pkg/dist-src/util/is-plain-object.js
+function isPlainObject(value) {
+  if (typeof value !== "object" || value === null)
+    return false;
+  if (Object.prototype.toString.call(value) !== "[object Object]")
+    return false;
+  const proto = Object.getPrototypeOf(value);
+  if (proto === null)
+    return true;
+  const Ctor = Object.prototype.hasOwnProperty.call(proto, "constructor") && proto.constructor;
+  return typeof Ctor === "function" && Ctor instanceof Ctor && Function.prototype.call(Ctor) === Function.prototype.call(value);
+}
+
 // pkg/dist-src/util/merge-deep.js
-var import_is_plain_object = __nccwpck_require__(3407);
 function mergeDeep(defaults, options) {
   const result = Object.assign({}, defaults);
   Object.keys(options).forEach((key) => {
-    if ((0, import_is_plain_object.isPlainObject)(options[key])) {
+    if (isPlainObject(options[key])) {
       if (!(key in defaults))
         Object.assign(result, { [key]: options[key] });
       else
@@ -5371,9 +5383,9 @@ function addQueryParameters(url, parameters) {
 }
 
 // pkg/dist-src/util/extract-url-variable-names.js
-var urlVariableRegex = /\{[^}]+\}/g;
+var urlVariableRegex = /\{[^{}}]+\}/g;
 function removeNonChars(variableName) {
-  return variableName.replace(/^\W+|\W+$/g, "").split(/,/);
+  return variableName.replace(/(?:^\W+)|(?:(?<!\W)\W+$)/g, "").split(/,/);
 }
 function extractUrlVariableNames(url) {
   const matches = url.match(urlVariableRegex);
@@ -5385,10 +5397,13 @@ function extractUrlVariableNames(url) {
 
 // pkg/dist-src/util/omit.js
 function omit(object, keysToOmit) {
-  return Object.keys(object).filter((option) => !keysToOmit.includes(option)).reduce((obj, key) => {
-    obj[key] = object[key];
-    return obj;
-  }, {});
+  const result = { __proto__: null };
+  for (const key of Object.keys(object)) {
+    if (keysToOmit.indexOf(key) === -1) {
+      result[key] = object[key];
+    }
+  }
+  return result;
 }
 
 // pkg/dist-src/util/url-template.js
@@ -5486,7 +5501,7 @@ function parseUrl(template) {
 }
 function expand(template, context) {
   var operators = ["+", "#", ".", "/", ";", "?", "&"];
-  return template.replace(
+  template = template.replace(
     /\{([^\{\}]+)\}|([^\{\}]+)/g,
     function(_, expression, literal) {
       if (expression) {
@@ -5516,6 +5531,11 @@ function expand(template, context) {
       }
     }
   );
+  if (template === "/") {
+    return template;
+  } else {
+    return template.replace(/\/$/, "");
+  }
 }
 
 // pkg/dist-src/parse.js
@@ -5551,7 +5571,7 @@ function parse(options) {
     }
     if (url.endsWith("/graphql")) {
       if (options.mediaType.previews?.length) {
-        const previewsFromAcceptHeader = headers.accept.match(/[\w-]+(?=-preview)/g) || [];
+        const previewsFromAcceptHeader = headers.accept.match(/(?<![\w-])[\w-]+(?=-preview)/g) || [];
         headers.accept = previewsFromAcceptHeader.concat(options.mediaType.previews).map((preview) => {
           const format = options.mediaType.format ? `.${options.mediaType.format}` : "+json";
           return `application/vnd.github.${preview}-preview${format}`;
@@ -5800,7 +5820,7 @@ __export(dist_src_exports, {
 module.exports = __toCommonJS(dist_src_exports);
 
 // pkg/dist-src/version.js
-var VERSION = "9.0.0";
+var VERSION = "9.2.2";
 
 // pkg/dist-src/normalize-paginated-list-response.js
 function normalizePaginatedListResponse(response) {
@@ -5848,7 +5868,7 @@ function iterator(octokit, route, parameters) {
           const response = await requestMethod({ method, url, headers });
           const normalizedResponse = normalizePaginatedListResponse(response);
           url = ((normalizedResponse.headers.link || "").match(
-            /<([^>]+)>;\s*rel="next"/
+            /<([^<>]+)>;\s*rel="next"/
           ) || [])[1];
           return { value: normalizedResponse };
         } catch (error) {
@@ -5961,6 +5981,8 @@ var paginatingEndpoints = [
   "GET /orgs/{org}/members/{username}/codespaces",
   "GET /orgs/{org}/migrations",
   "GET /orgs/{org}/migrations/{migration_id}/repositories",
+  "GET /orgs/{org}/organization-roles/{role_id}/teams",
+  "GET /orgs/{org}/organization-roles/{role_id}/users",
   "GET /orgs/{org}/outside_collaborators",
   "GET /orgs/{org}/packages",
   "GET /orgs/{org}/packages/{package_type}/{package_name}/versions",
@@ -5969,9 +5991,11 @@ var paginatingEndpoints = [
   "GET /orgs/{org}/personal-access-tokens",
   "GET /orgs/{org}/personal-access-tokens/{pat_id}/repositories",
   "GET /orgs/{org}/projects",
+  "GET /orgs/{org}/properties/values",
   "GET /orgs/{org}/public_members",
   "GET /orgs/{org}/repos",
   "GET /orgs/{org}/rulesets",
+  "GET /orgs/{org}/rulesets/rule-suites",
   "GET /orgs/{org}/secret-scanning/alerts",
   "GET /orgs/{org}/security-advisories",
   "GET /orgs/{org}/teams",
@@ -6063,6 +6087,7 @@ var paginatingEndpoints = [
   "GET /repos/{owner}/{repo}/releases/{release_id}/reactions",
   "GET /repos/{owner}/{repo}/rules/branches/{branch}",
   "GET /repos/{owner}/{repo}/rulesets",
+  "GET /repos/{owner}/{repo}/rulesets/rule-suites",
   "GET /repos/{owner}/{repo}/secret-scanning/alerts",
   "GET /repos/{owner}/{repo}/secret-scanning/alerts/{alert_number}/locations",
   "GET /repos/{owner}/{repo}/security-advisories",
@@ -8230,7 +8255,7 @@ var RequestError = class extends Error {
     if (options.request.headers.authorization) {
       requestCopy.headers = Object.assign({}, options.request.headers, {
         authorization: options.request.headers.authorization.replace(
-          / .*$/,
+          /(?<! ) .*$/,
           " [REDACTED]"
         )
       });
@@ -8298,10 +8323,22 @@ var import_endpoint = __nccwpck_require__(4471);
 var import_universal_user_agent = __nccwpck_require__(3843);
 
 // pkg/dist-src/version.js
-var VERSION = "8.1.4";
+var VERSION = "8.4.1";
+
+// pkg/dist-src/is-plain-object.js
+function isPlainObject(value) {
+  if (typeof value !== "object" || value === null)
+    return false;
+  if (Object.prototype.toString.call(value) !== "[object Object]")
+    return false;
+  const proto = Object.getPrototypeOf(value);
+  if (proto === null)
+    return true;
+  const Ctor = Object.prototype.hasOwnProperty.call(proto, "constructor") && proto.constructor;
+  return typeof Ctor === "function" && Ctor instanceof Ctor && Function.prototype.call(Ctor) === Function.prototype.call(value);
+}
 
 // pkg/dist-src/fetch-wrapper.js
-var import_is_plain_object = __nccwpck_require__(3407);
 var import_request_error = __nccwpck_require__(3708);
 
 // pkg/dist-src/get-buffer-response.js
@@ -8311,10 +8348,10 @@ function getBufferResponse(response) {
 
 // pkg/dist-src/fetch-wrapper.js
 function fetchWrapper(requestOptions) {
-  var _a, _b, _c;
+  var _a, _b, _c, _d;
   const log = requestOptions.request && requestOptions.request.log ? requestOptions.request.log : console;
   const parseSuccessResponseBody = ((_a = requestOptions.request) == null ? void 0 : _a.parseSuccessResponseBody) !== false;
-  if ((0, import_is_plain_object.isPlainObject)(requestOptions.body) || Array.isArray(requestOptions.body)) {
+  if (isPlainObject(requestOptions.body) || Array.isArray(requestOptions.body)) {
     requestOptions.body = JSON.stringify(requestOptions.body);
   }
   let headers = {};
@@ -8332,8 +8369,9 @@ function fetchWrapper(requestOptions) {
   return fetch(requestOptions.url, {
     method: requestOptions.method,
     body: requestOptions.body,
+    redirect: (_c = requestOptions.request) == null ? void 0 : _c.redirect,
     headers: requestOptions.headers,
-    signal: (_c = requestOptions.request) == null ? void 0 : _c.signal,
+    signal: (_d = requestOptions.request) == null ? void 0 : _d.signal,
     // duplex must be set if request.body is ReadableStream or Async Iterables.
     // See https://fetch.spec.whatwg.org/#dom-requestinit-duplex.
     ...requestOptions.body && { duplex: "half" }
@@ -8344,7 +8382,7 @@ function fetchWrapper(requestOptions) {
       headers[keyAndValue[0]] = keyAndValue[1];
     }
     if ("deprecation" in headers) {
-      const matches = headers.link && headers.link.match(/<([^>]+)>; rel="deprecation"/);
+      const matches = headers.link && headers.link.match(/<([^<>]+)>; rel="deprecation"/);
       const deprecationLink = matches && matches.pop();
       log.warn(
         `[@octokit/request] "${requestOptions.method} ${requestOptions.url}" is deprecated. It is scheduled to be removed on ${headers.sunset}${deprecationLink ? `. See ${deprecationLink}` : ""}`
@@ -8420,7 +8458,7 @@ function fetchWrapper(requestOptions) {
 async function getResponseData(response) {
   const contentType = response.headers.get("content-type");
   if (/application\/json/.test(contentType)) {
-    return response.json();
+    return response.json().catch(() => response.text()).catch(() => "");
   }
   if (!contentType || /^text\/|charset=utf-8$/.test(contentType)) {
     return response.text();
@@ -8430,11 +8468,17 @@ async function getResponseData(response) {
 function toErrorMessage(data) {
   if (typeof data === "string")
     return data;
+  let suffix;
+  if ("documentation_url" in data) {
+    suffix = ` - ${data.documentation_url}`;
+  } else {
+    suffix = "";
+  }
   if ("message" in data) {
     if (Array.isArray(data.errors)) {
-      return `${data.message}: ${data.errors.map(JSON.stringify).join(", ")}`;
+      return `${data.message}: ${data.errors.map(JSON.stringify).join(", ")}${suffix}`;
     }
-    return data.message;
+    return `${data.message}${suffix}`;
   }
   return `Unknown error: ${JSON.stringify(data)}`;
 }
@@ -8681,52 +8725,6 @@ class Deprecation extends Error {
 }
 
 exports.Deprecation = Deprecation;
-
-
-/***/ }),
-
-/***/ 3407:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-
-/*!
- * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
- *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-function isObject(o) {
-  return Object.prototype.toString.call(o) === '[object Object]';
-}
-
-function isPlainObject(o) {
-  var ctor,prot;
-
-  if (isObject(o) === false) return false;
-
-  // If has modified constructor
-  ctor = o.constructor;
-  if (ctor === undefined) return true;
-
-  // If has modified prototype
-  prot = ctor.prototype;
-  if (isObject(prot) === false) return false;
-
-  // If constructor does not have an Object-specific method
-  if (prot.hasOwnProperty('isPrototypeOf') === false) {
-    return false;
-  }
-
-  // Most likely a plain Object
-  return true;
-}
-
-exports.isPlainObject = isPlainObject;
 
 
 /***/ }),
