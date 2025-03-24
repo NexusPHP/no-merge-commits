@@ -33,7 +33,7 @@
     "@actions/github": "^6.0.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.19.0",
+    "@eslint/js": "^9.23.0",
     "@octokit/tsconfig": "^4.0.0",
     "@types/node": "^22.13.10",
     "@vercel/ncc": "^0.38.3",
