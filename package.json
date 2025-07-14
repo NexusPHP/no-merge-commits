@@ -37,7 +37,7 @@
     "@octokit/tsconfig": "^4.0.0",
     "@types/node": "^24.0.13",
     "@vercel/ncc": "^0.38.3",
-    "eslint": "^9.30.1",
+    "eslint": "^9.31.0",
     "jiti": "^2.4.2",
     "prettier": "^3.6.2",
     "prettier-plugin-organize-imports": "^4.1.0",
