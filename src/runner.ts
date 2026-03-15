@@ -1,6 +1,8 @@
-import { getInput } from "@actions/core";
+import { getInput, setFailed } from "@actions/core";
 import { context, getOctokit } from "@actions/github";
 import { inflect, log } from "./util.js";
+
+const MERGE_COMMIT_PARENT_COUNT = 2;
 
 export async function runner(): Promise<void> {
     log("Collecting token from input...", "notice");
@@ -11,21 +13,27 @@ export async function runner(): Promise<void> {
     const client = getOctokit(token);
     log("Octokit client is ready.", "info");
 
-    const { owner, repo, number } = context.issue;
+    const { owner, repo, number: pull_number } = context.issue;
     log(`Looking up owner: ${owner}`, "debug");
     log(`Looking up repository: ${repo}`, "debug");
-    log(`Looking up pull request number: ${number}`, "debug");
+    log(`Looking up pull request number: ${pull_number}`, "debug");
 
-    log(`Retrieving commits of PR #${number}...`, "notice");
+    log(`Retrieving commits of PR #${pull_number}...`, "notice");
 
-    const { data: commits, status } = await client.rest.pulls.listCommits({
+    const { data: commits, status: httpStatus } = await client.rest.pulls.listCommits({
         owner,
         repo,
-        pull_number: context.issue.number,
+        pull_number,
     });
 
-    log(`HTTP Status: ${status}`, "info");
-    log(`PR #${number} contains ${commits.length} ${inflect(commits, "commit.", "commits.")}`, "info");
+    if (httpStatus !== 200) {
+        setFailed(`Failed to retrieve commits: HTTP ${String(httpStatus)}`);
+
+        return;
+    }
+
+    log(`HTTP Status: ${String(httpStatus)}`, "info");
+    log(`PR #${pull_number} contains ${commits.length} ${inflect(commits, "commit.", "commits.")}`, "info");
 
     let mergeCommits = 0;
 
@@ -34,7 +42,7 @@ export async function runner(): Promise<void> {
 
         log(`Inspecting commit SHA: ${shortSha}`, "notice");
 
-        if (parents.length > 1) {
+        if (parents.length >= MERGE_COMMIT_PARENT_COUNT) {
             log(`Commit SHA ${shortSha} is a merge commit!`, "error");
 
             mergeCommits++;
@@ -42,7 +50,13 @@ export async function runner(): Promise<void> {
     }
 
     if (mergeCommits > 0) {
-        throw new Error("Merge commits were found in this pull request.");
+        const message =
+            mergeCommits === 1
+                ? "1 merge commit was found in this pull request."
+                : `${mergeCommits} merge commits were found in this pull request.`;
+        setFailed(message);
+
+        return;
     }
 
     log("No merge commits found in this pull request.", "info");

@@ -36118,6 +36118,11 @@ function getOctokit(token, options, ...additionalPlugins) {
 //# sourceMappingURL=github.js.map
 ;// CONCATENATED MODULE: ./lib/util.js
 
+/**
+ * Returns ANSI color code for the given log level
+ * @param type - The log level type
+ * @returns ANSI color code string
+ */
 function color(type) {
     switch (type) {
         case "error":
@@ -36134,6 +36139,11 @@ function color(type) {
             return "\x1B[32m";
     }
 }
+/**
+ * Logs a message through GitHub Actions with appropriate color and level
+ * @param message - The message to log
+ * @param type - The log level (debug, error, notice, info)
+ */
 function log(message, type) {
     let callable;
     switch (type) {
@@ -36150,14 +36160,22 @@ function log(message, type) {
     }
     callable(`${color(type)}[${type.toUpperCase()}] ${message}${color("reset")}`);
 }
+/**
+ * Returns singular or plural form based on array length
+ * @param iterable - Array to check length
+ * @param singular - Singular form
+ * @param plural - Plural form
+ * @returns Singular or plural string based on array length
+ */
 function inflect(iterable, singular, plural) {
-    return (iterable.length > 1 && plural) || singular;
+    return iterable.length > 1 ? plural : singular;
 }
 //# sourceMappingURL=util.js.map
 ;// CONCATENATED MODULE: ./lib/runner.js
 
 
 
+const MERGE_COMMIT_PARENT_COUNT = 2;
 async function runner() {
     log("Collecting token from input...", "notice");
     const token = getInput("token", { required: true });
@@ -36165,29 +36183,37 @@ async function runner() {
     log("Instantiating an Octokit client using token...", "notice");
     const client = getOctokit(token);
     log("Octokit client is ready.", "info");
-    const { owner, repo, number } = github_context.issue;
+    const { owner, repo, number: pull_number } = github_context.issue;
     log(`Looking up owner: ${owner}`, "debug");
     log(`Looking up repository: ${repo}`, "debug");
-    log(`Looking up pull request number: ${number}`, "debug");
-    log(`Retrieving commits of PR #${number}...`, "notice");
-    const { data: commits, status } = await client.rest.pulls.listCommits({
+    log(`Looking up pull request number: ${pull_number}`, "debug");
+    log(`Retrieving commits of PR #${pull_number}...`, "notice");
+    const { data: commits, status: httpStatus } = await client.rest.pulls.listCommits({
         owner,
         repo,
-        pull_number: github_context.issue.number,
+        pull_number,
     });
-    log(`HTTP Status: ${status}`, "info");
-    log(`PR #${number} contains ${commits.length} ${inflect(commits, "commit.", "commits.")}`, "info");
+    if (httpStatus !== 200) {
+        setFailed(`Failed to retrieve commits: HTTP ${String(httpStatus)}`);
+        return;
+    }
+    log(`HTTP Status: ${String(httpStatus)}`, "info");
+    log(`PR #${pull_number} contains ${commits.length} ${inflect(commits, "commit.", "commits.")}`, "info");
     let mergeCommits = 0;
     for (const { sha, parents } of commits) {
         const shortSha = sha.substring(0, 7);
         log(`Inspecting commit SHA: ${shortSha}`, "notice");
-        if (parents.length > 1) {
+        if (parents.length >= MERGE_COMMIT_PARENT_COUNT) {
             log(`Commit SHA ${shortSha} is a merge commit!`, "error");
             mergeCommits++;
         }
     }
     if (mergeCommits > 0) {
-        throw new Error("Merge commits were found in this pull request.");
+        const message = mergeCommits === 1
+            ? "1 merge commit was found in this pull request."
+            : `${mergeCommits} merge commits were found in this pull request.`;
+        setFailed(message);
+        return;
     }
     log("No merge commits found in this pull request.", "info");
 }
@@ -36199,8 +36225,13 @@ async function runner() {
 void (async () => {
     await runner().catch((error) => {
         if (error instanceof Error) {
-            process.exitCode = ExitCode.Failure;
-            log(error.message, "error");
+            setFailed(error.message);
+            if (error.stack) {
+                log(`Stack trace: ${error.stack}`, "debug");
+            }
+        }
+        else {
+            setFailed("An unknown error occurred");
         }
     });
 })();

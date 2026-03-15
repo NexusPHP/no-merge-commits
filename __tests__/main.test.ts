@@ -1,3 +1,4 @@
+import * as core from "@actions/core";
 import * as github from "@actions/github";
 import { EOL } from "os";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -28,10 +29,12 @@ vi.mock("@actions/core", async (importOriginal) => {
             }
             return process.env["INPUT_TOKEN"] ?? "";
         }),
+        setFailed: vi.fn(),
     };
 });
 
 const mockGetOctokit = vi.mocked(github.getOctokit);
+const mockSetFailed = vi.mocked(core.setFailed);
 
 describe("nexusphp/no-merge-commits main", () => {
     beforeEach(() => {
@@ -137,7 +140,8 @@ describe("nexusphp/no-merge-commits main", () => {
             },
         } as unknown as ReturnType<typeof github.getOctokit>);
 
-        await expect(runner()).rejects.toThrowError("Merge commits were found in this pull request.");
+        await expect(runner()).resolves.toBeUndefined();
+        expect(mockSetFailed).toHaveBeenCalledWith("1 merge commit was found in this pull request.");
 
         assertWritten([
             "\x1B[37m[NOTICE] Collecting token from input...\x1B[0m",

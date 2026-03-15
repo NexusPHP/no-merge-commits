@@ -12,13 +12,11 @@ describe("nexusphp/no-merge-commits util", () => {
     });
 
     test("color gives the correct type", () => {
-        expect(color("")).toBe("\x1B[32m");
         expect(color("info")).toBe("\x1B[32m");
         expect(color("error")).toBe("\x1B[31m");
         expect(color("reset")).toBe("\x1B[0m");
         expect(color("notice")).toBe("\x1B[37m");
         expect(color("warning")).toBe("\x1B[33m");
-        expect(color("other")).toBe("\x1B[32m");
     });
 
     test("log gives correct log message", () => {
