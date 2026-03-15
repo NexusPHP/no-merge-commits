@@ -1,6 +1,6 @@
 import { getInput } from "@actions/core";
 import { context, getOctokit } from "@actions/github";
-import { inflect, log } from "./util";
+import { inflect, log } from "./util.js";
 
 export async function runner(): Promise<void> {
     log("Collecting token from input...", "notice");

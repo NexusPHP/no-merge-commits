@@ -1,31 +1,48 @@
 import * as github from "@actions/github";
-import { afterEach, beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { EOL } from "os";
-import { runner } from "../src/runner";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { runner } from "../src/runner.js";
+
+vi.mock("@actions/github", async (importOriginal) => {
+    const actual = await importOriginal<typeof import("@actions/github")>();
+    return {
+        ...actual,
+        context: {
+            issue: {
+                number: 1,
+                owner: "me",
+                repo: "awesome",
+            },
+        },
+        getOctokit: vi.fn(),
+    };
+});
+
+vi.mock("@actions/core", async (importOriginal) => {
+    const actual = await importOriginal<typeof import("@actions/core")>();
+    return {
+        ...actual,
+        getInput: vi.fn((name: string) => {
+            if (name === "token" && !process.env["INPUT_TOKEN"]) {
+                throw new Error("Input required and not supplied: token");
+            }
+            return process.env["INPUT_TOKEN"] || "";
+        }),
+    };
+});
+
+const mockGetOctokit = vi.mocked(github.getOctokit);
 
 describe("nexusphp/no-merge-commits main", () => {
     beforeEach(() => {
         process.env["INPUT_TOKEN"] = "someToken";
-
-        jest.spyOn(github.context, "repo", "get").mockImplementation(() => {
-            return {
-                owner: "me",
-                repo: "awesome",
-            };
-        });
-        jest.spyOn(github.context, "issue", "get").mockImplementation(() => {
-            return {
-                number: 1,
-                owner: "me",
-                repo: "awesome",
-            };
-        });
-        jest.spyOn(process.stdout, "write").mockImplementation(jest.fn<() => boolean>());
-        jest.spyOn(process.stderr, "write").mockImplementation(jest.fn<() => boolean>());
+        vi.spyOn(process.stdout, "write").mockImplementation(vi.fn<() => boolean>());
+        vi.spyOn(process.stderr, "write").mockImplementation(vi.fn<() => boolean>());
     });
 
     afterEach(() => {
-        jest.restoreAllMocks();
+        vi.restoreAllMocks();
+        delete process.env["INPUT_TOKEN"];
     });
 
     function assertWritten(calls: string[]): void {
@@ -44,34 +61,30 @@ describe("nexusphp/no-merge-commits main", () => {
     });
 
     it("succeeds checking no merge commits", async () => {
-        jest.spyOn(github, "getOctokit").mockImplementation(
-            jest.fn<ReturnType<any>>(() => {
-                return {
-                    rest: {
-                        pulls: {
-                            listCommits: () => {
-                                return {
-                                    data: [
+        mockGetOctokit.mockReturnValue({
+            rest: {
+                pulls: {
+                    listCommits: () => {
+                        return {
+                            data: [
+                                {
+                                    sha: "819a33b1698acae12d7d8ae9a9b9d2bcb70246b2",
+                                    html_url: "https://some.place",
+                                    parents: [
                                         {
-                                            sha: "819a33b1698acae12d7d8ae9a9b9d2bcb70246b2",
+                                            sha: "a6bb65ad37fe4fda1e1dfe2d5beeae91ead50bfe",
+                                            url: "https://api.some.place",
                                             html_url: "https://some.place",
-                                            parents: [
-                                                {
-                                                    sha: "a6bb65ad37fe4fda1e1dfe2d5beeae91ead50bfe",
-                                                    url: "https://api.some.place",
-                                                    html_url: "https://some.place",
-                                                },
-                                            ],
                                         },
                                     ],
-                                    status: 200,
-                                };
-                            },
-                        },
+                                },
+                            ],
+                            status: 200,
+                        };
                     },
-                };
-            }),
-        );
+                },
+            },
+        } as any);
 
         await expect(runner()).resolves.toBeUndefined();
 
@@ -92,39 +105,35 @@ describe("nexusphp/no-merge-commits main", () => {
     });
 
     it("fails when a merge commit is detected", async () => {
-        jest.spyOn(github, "getOctokit").mockImplementation(
-            jest.fn<ReturnType<any>>(() => {
-                return {
-                    rest: {
-                        pulls: {
-                            listCommits: () => {
-                                return {
-                                    data: [
+        mockGetOctokit.mockReturnValue({
+            rest: {
+                pulls: {
+                    listCommits: () => {
+                        return {
+                            data: [
+                                {
+                                    sha: "819a33b1698acae12d7d8ae9a9b9d2bcb70246b2",
+                                    html_url: "https://some.place",
+                                    parents: [
                                         {
-                                            sha: "819a33b1698acae12d7d8ae9a9b9d2bcb70246b2",
+                                            sha: "a6bb65ad37fe4fda1e1dfe2d5beeae91ead50bfe",
+                                            url: "https://api.some.place",
                                             html_url: "https://some.place",
-                                            parents: [
-                                                {
-                                                    sha: "a6bb65ad37fe4fda1e1dfe2d5beeae91ead50bfe",
-                                                    url: "https://api.some.place",
-                                                    html_url: "https://some.place",
-                                                },
-                                                {
-                                                    sha: "c75b41ded1540564f1b9340acf5c909288a3b466",
-                                                    url: "https://api.some.place",
-                                                    html_url: "https://some.place",
-                                                },
-                                            ],
+                                        },
+                                        {
+                                            sha: "c75b41ded1540564f1b9340acf5c909288a3b466",
+                                            url: "https://api.some.place",
+                                            html_url: "https://some.place",
                                         },
                                     ],
-                                    status: 200,
-                                };
-                            },
-                        },
+                                },
+                            ],
+                            status: 200,
+                        };
                     },
-                };
-            }),
-        );
+                },
+            },
+        } as any);
 
         await expect(runner()).rejects.toThrowError("Merge commits were found in this pull request.");
 

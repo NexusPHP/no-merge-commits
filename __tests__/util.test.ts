@@ -1,14 +1,14 @@
-import { afterEach, beforeEach, describe, expect, jest, test } from "@jest/globals";
 import { EOL } from "os";
-import { color, inflect, log } from "../src/util";
+import { afterEach, beforeEach, describe, expect, it as test, vi } from "vitest";
+import { color, inflect, log } from "../src/util.js";
 
 describe("nexusphp/no-merge-commits util", () => {
     beforeEach(() => {
-        jest.spyOn(process.stdout, "write").mockImplementation(jest.fn<() => boolean>());
+        vi.spyOn(process.stdout, "write").mockImplementation(vi.fn<() => boolean>());
     });
 
     afterEach(() => {
-        jest.restoreAllMocks();
+        vi.restoreAllMocks();
     });
 
     test("color gives the correct type", () => {

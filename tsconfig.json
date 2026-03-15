@@ -8,13 +8,14 @@
     "rootDir": "src",
     "outDir": "lib",
     "sourceMap": true,
-    "esModuleInterop": true,
     "lib": [
       "ES2023",
       "DOM"
     ],
     "skipLibCheck": true,
-    "verbatimModuleSyntax": false
+    "verbatimModuleSyntax": false,
+    "module": "Node16",
+    "target": "ES2020"
   },
   "include": [
     "src/**/*"

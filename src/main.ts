@@ -1,6 +1,6 @@
 import { ExitCode } from "@actions/core";
-import { runner } from "./runner";
-import { log } from "./util";
+import { runner } from "./runner.js";
+import { log } from "./util.js";
 
 void (async (): Promise<void> => {
     await runner().catch((error: unknown) => {
