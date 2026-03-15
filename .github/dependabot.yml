@@ -11,11 +11,8 @@ updates:
       timezone: 'Asia/Manila'
     labels:
       - 'type/enhancement'
-    ignore:
-      - dependency-name: '*'
-        update-types:
-          - 'version-update:semver-minor'
-          - 'version-update:semver-patch'
+    allow:
+      - dependency-type: 'all'
 
   - package-ecosystem: 'npm'
     directory: '/'
@@ -25,3 +22,5 @@ updates:
       timezone: 'Asia/Manila'
     labels:
       - 'type/enhancement'
+    allow:
+      - dependency-type: 'direct'
