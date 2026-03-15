@@ -26,7 +26,7 @@ vi.mock("@actions/core", async (importOriginal) => {
             if (name === "token" && !process.env["INPUT_TOKEN"]) {
                 throw new Error("Input required and not supplied: token");
             }
-            return process.env["INPUT_TOKEN"] || "";
+            return process.env["INPUT_TOKEN"] ?? "";
         }),
     };
 });
@@ -46,9 +46,11 @@ describe("nexusphp/no-merge-commits main", () => {
     });
 
     function assertWritten(calls: string[]): void {
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         expect(process.stdout.write).toHaveBeenCalledTimes(calls.length);
 
         for (let i = 0; i < calls.length; i++) {
+            // eslint-disable-next-line @typescript-eslint/unbound-method
             expect(process.stdout.write).toHaveBeenNthCalledWith(i + 1, calls[i] + EOL);
         }
     }
@@ -84,7 +86,7 @@ describe("nexusphp/no-merge-commits main", () => {
                     },
                 },
             },
-        } as any);
+        } as unknown as ReturnType<typeof github.getOctokit>);
 
         await expect(runner()).resolves.toBeUndefined();
 
@@ -133,7 +135,7 @@ describe("nexusphp/no-merge-commits main", () => {
                     },
                 },
             },
-        } as any);
+        } as unknown as ReturnType<typeof github.getOctokit>);
 
         await expect(runner()).rejects.toThrowError("Merge commits were found in this pull request.");
 

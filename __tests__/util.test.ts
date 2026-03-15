@@ -24,6 +24,7 @@ describe("nexusphp/no-merge-commits util", () => {
     test("log gives correct log message", () => {
         log("Notice", "info");
 
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         expect(process.stdout.write).toHaveBeenNthCalledWith(1, `\x1B[32m[INFO] Notice\x1B[0m${EOL}`);
     });
 
