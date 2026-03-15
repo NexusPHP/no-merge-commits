@@ -30,7 +30,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run test
-        uses: NexusPHP/no-merge-commits@v2.2.1
+        uses: NexusPHP/no-merge-commits@v2.3.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
