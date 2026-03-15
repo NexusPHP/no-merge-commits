@@ -14,8 +14,8 @@
     ],
     "skipLibCheck": true,
     "verbatimModuleSyntax": false,
-    "module": "Node16",
-    "target": "ES2020"
+    "module": "nodenext",
+    "target": "ES2024"
   },
   "include": [
     "src/**/*"

@@ -22,10 +22,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Set Node 20
+      - name: Set Node 24
         uses: actions/setup-node@v6
         with:
-          node-version: '20.x'
+          node-version: '24.x'
 
       - name: Cache dependencies
         id: cache-npm
