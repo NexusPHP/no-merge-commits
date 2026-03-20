@@ -62,7 +62,7 @@ describe("nexusphp/no-merge-commits main", () => {
         process.env["INPUT_TOKEN"] = "";
 
         await expect(runner()).rejects.toThrowError("Input required and not supplied: token");
-        assertWritten(["\x1B[37m[NOTICE] Collecting token from input...\x1B[0m"]);
+        assertWritten(["::notice::Collecting token from input..."]);
     });
 
     it("succeeds checking no merge commits", async () => {
@@ -94,18 +94,18 @@ describe("nexusphp/no-merge-commits main", () => {
         await expect(runner()).resolves.toBeUndefined();
 
         assertWritten([
-            "\x1B[37m[NOTICE] Collecting token from input...\x1B[0m",
-            "\x1B[32m[INFO] Token collected.\x1B[0m",
-            "\x1B[37m[NOTICE] Instantiating an Octokit client using token...\x1B[0m",
-            "\x1B[32m[INFO] Octokit client is ready.\x1B[0m",
-            "::debug::\x1B[37m[DEBUG] Looking up owner: me\x1B[0m",
-            "::debug::\x1B[37m[DEBUG] Looking up repository: awesome\x1B[0m",
-            "::debug::\x1B[37m[DEBUG] Looking up pull request number: 1\x1B[0m",
-            "\x1B[37m[NOTICE] Retrieving commits of PR #1...\x1B[0m",
-            "\x1B[32m[INFO] HTTP Status: 200\x1B[0m",
-            "\x1B[32m[INFO] PR #1 contains 1 commit.\x1B[0m",
-            "\x1B[37m[NOTICE] Inspecting commit SHA: 819a33b\x1B[0m",
-            "\x1B[32m[INFO] No merge commits found in this pull request.\x1B[0m",
+            "::notice::Collecting token from input...",
+            "Token collected.",
+            "::notice::Instantiating an Octokit client using token...",
+            "Octokit client is ready.",
+            "::debug::Looking up owner: me",
+            "::debug::Looking up repository: awesome",
+            "::debug::Looking up pull request number: 1",
+            "::notice::Retrieving commits of PR #1...",
+            "HTTP Status: 200",
+            "PR #1 contains 1 commit.",
+            "::notice::Inspecting commit SHA: 819a33b",
+            "No merge commits found in this pull request.",
         ]);
     });
 
@@ -144,18 +144,18 @@ describe("nexusphp/no-merge-commits main", () => {
         expect(mockSetFailed).toHaveBeenCalledWith("1 merge commit was found in this pull request.");
 
         assertWritten([
-            "\x1B[37m[NOTICE] Collecting token from input...\x1B[0m",
-            "\x1B[32m[INFO] Token collected.\x1B[0m",
-            "\x1B[37m[NOTICE] Instantiating an Octokit client using token...\x1B[0m",
-            "\x1B[32m[INFO] Octokit client is ready.\x1B[0m",
-            "::debug::\x1B[37m[DEBUG] Looking up owner: me\x1B[0m",
-            "::debug::\x1B[37m[DEBUG] Looking up repository: awesome\x1B[0m",
-            "::debug::\x1B[37m[DEBUG] Looking up pull request number: 1\x1B[0m",
-            "\x1B[37m[NOTICE] Retrieving commits of PR #1...\x1B[0m",
-            "\x1B[32m[INFO] HTTP Status: 200\x1B[0m",
-            "\x1B[32m[INFO] PR #1 contains 1 commit.\x1B[0m",
-            "\x1B[37m[NOTICE] Inspecting commit SHA: 819a33b\x1B[0m",
-            "::error::\x1B[31m[ERROR] Commit SHA 819a33b is a merge commit!\x1B[0m",
+            "::notice::Collecting token from input...",
+            "Token collected.",
+            "::notice::Instantiating an Octokit client using token...",
+            "Octokit client is ready.",
+            "::debug::Looking up owner: me",
+            "::debug::Looking up repository: awesome",
+            "::debug::Looking up pull request number: 1",
+            "::notice::Retrieving commits of PR #1...",
+            "HTTP Status: 200",
+            "PR #1 contains 1 commit.",
+            "::notice::Inspecting commit SHA: 819a33b",
+            "::error::Commit SHA 819a33b is a merge commit!",
         ]);
     });
 });

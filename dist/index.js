@@ -31786,7 +31786,7 @@ function warning(message, properties = {}) {
  * @param properties optional properties to add to the annotation.
  */
 function notice(message, properties = {}) {
-    issueCommand('notice', toCommandProperties(properties), message instanceof Error ? message.toString() : message);
+    command_issueCommand('notice', utils_toCommandProperties(properties), message instanceof Error ? message.toString() : message);
 }
 /**
  * Writes info to log with console.log.
@@ -36117,49 +36117,6 @@ function getOctokit(token, options, ...additionalPlugins) {
 }
 //# sourceMappingURL=github.js.map
 ;// CONCATENATED MODULE: ./lib/util.js
-
-/**
- * Returns ANSI color code for the given log level
- * @param type - The log level type
- * @returns ANSI color code string
- */
-function color(type) {
-    switch (type) {
-        case "error":
-            return "\x1B[31m";
-        case "warning":
-            return "\x1B[33m";
-        case "debug":
-        case "notice":
-            return "\x1B[37m";
-        case "reset":
-            return "\x1B[0m";
-        case "info":
-        default:
-            return "\x1B[32m";
-    }
-}
-/**
- * Logs a message through GitHub Actions with appropriate color and level
- * @param message - The message to log
- * @param type - The log level (debug, error, notice, info)
- */
-function log(message, type) {
-    let callable;
-    switch (type) {
-        case "debug":
-            callable = core_debug;
-            break;
-        case "error":
-            callable = error;
-            break;
-        case "notice":
-        case "info":
-        default:
-            callable = info;
-    }
-    callable(`${color(type)}[${type.toUpperCase()}] ${message}${color("reset")}`);
-}
 /**
  * Returns singular or plural form based on array length
  * @param iterable - Array to check length
@@ -36177,17 +36134,17 @@ function inflect(iterable, singular, plural) {
 
 const MERGE_COMMIT_PARENT_COUNT = 2;
 async function runner() {
-    log("Collecting token from input...", "notice");
+    notice("Collecting token from input...");
     const token = getInput("token", { required: true });
-    log("Token collected.", "info");
-    log("Instantiating an Octokit client using token...", "notice");
+    info("Token collected.");
+    notice("Instantiating an Octokit client using token...");
     const client = getOctokit(token);
-    log("Octokit client is ready.", "info");
+    info("Octokit client is ready.");
     const { owner, repo, number: pull_number } = github_context.issue;
-    log(`Looking up owner: ${owner}`, "debug");
-    log(`Looking up repository: ${repo}`, "debug");
-    log(`Looking up pull request number: ${pull_number}`, "debug");
-    log(`Retrieving commits of PR #${pull_number}...`, "notice");
+    core_debug(`Looking up owner: ${owner}`);
+    core_debug(`Looking up repository: ${repo}`);
+    core_debug(`Looking up pull request number: ${pull_number}`);
+    notice(`Retrieving commits of PR #${pull_number}...`);
     const { data: commits, status: httpStatus } = await client.rest.pulls.listCommits({
         owner,
         repo,
@@ -36197,14 +36154,14 @@ async function runner() {
         setFailed(`Failed to retrieve commits: HTTP ${String(httpStatus)}`);
         return;
     }
-    log(`HTTP Status: ${String(httpStatus)}`, "info");
-    log(`PR #${pull_number} contains ${commits.length} ${inflect(commits, "commit.", "commits.")}`, "info");
+    info("HTTP Status: 200");
+    info(`PR #${pull_number} contains ${commits.length} ${inflect(commits, "commit.", "commits.")}`);
     let mergeCommits = 0;
     for (const { sha, parents } of commits) {
         const shortSha = sha.substring(0, 7);
-        log(`Inspecting commit SHA: ${shortSha}`, "notice");
+        notice(`Inspecting commit SHA: ${shortSha}`);
         if (parents.length >= MERGE_COMMIT_PARENT_COUNT) {
-            log(`Commit SHA ${shortSha} is a merge commit!`, "error");
+            error(`Commit SHA ${shortSha} is a merge commit!`);
             mergeCommits++;
         }
     }
@@ -36215,11 +36172,10 @@ async function runner() {
         setFailed(message);
         return;
     }
-    log("No merge commits found in this pull request.", "info");
+    info("No merge commits found in this pull request.");
 }
 //# sourceMappingURL=runner.js.map
 ;// CONCATENATED MODULE: ./lib/main.js
-
 
 
 void (async () => {
@@ -36227,7 +36183,7 @@ void (async () => {
         if (error instanceof Error) {
             setFailed(error.message);
             if (error.stack) {
-                log(`Stack trace: ${error.stack}`, "debug");
+                core_debug(`Stack trace: ${error.stack}`);
             }
         }
         else {

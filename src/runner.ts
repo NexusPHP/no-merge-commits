@@ -1,24 +1,24 @@
-import { getInput, setFailed } from "@actions/core";
+import { debug, error, getInput, info, notice, setFailed } from "@actions/core";
 import { context, getOctokit } from "@actions/github";
-import { inflect, log } from "./util.js";
+import { inflect } from "./util.js";
 
 const MERGE_COMMIT_PARENT_COUNT = 2;
 
 export async function runner(): Promise<void> {
-    log("Collecting token from input...", "notice");
+    notice("Collecting token from input...");
     const token = getInput("token", { required: true });
-    log("Token collected.", "info");
+    info("Token collected.");
 
-    log("Instantiating an Octokit client using token...", "notice");
+    notice("Instantiating an Octokit client using token...");
     const client = getOctokit(token);
-    log("Octokit client is ready.", "info");
+    info("Octokit client is ready.");
 
     const { owner, repo, number: pull_number } = context.issue;
-    log(`Looking up owner: ${owner}`, "debug");
-    log(`Looking up repository: ${repo}`, "debug");
-    log(`Looking up pull request number: ${pull_number}`, "debug");
+    debug(`Looking up owner: ${owner}`);
+    debug(`Looking up repository: ${repo}`);
+    debug(`Looking up pull request number: ${pull_number}`);
 
-    log(`Retrieving commits of PR #${pull_number}...`, "notice");
+    notice(`Retrieving commits of PR #${pull_number}...`);
 
     const { data: commits, status: httpStatus } = await client.rest.pulls.listCommits({
         owner,
@@ -32,18 +32,18 @@ export async function runner(): Promise<void> {
         return;
     }
 
-    log(`HTTP Status: ${String(httpStatus)}`, "info");
-    log(`PR #${pull_number} contains ${commits.length} ${inflect(commits, "commit.", "commits.")}`, "info");
+    info("HTTP Status: 200");
+    info(`PR #${pull_number} contains ${commits.length} ${inflect(commits, "commit.", "commits.")}`);
 
     let mergeCommits = 0;
 
     for (const { sha, parents } of commits) {
         const shortSha = sha.substring(0, 7);
 
-        log(`Inspecting commit SHA: ${shortSha}`, "notice");
+        notice(`Inspecting commit SHA: ${shortSha}`);
 
         if (parents.length >= MERGE_COMMIT_PARENT_COUNT) {
-            log(`Commit SHA ${shortSha} is a merge commit!`, "error");
+            error(`Commit SHA ${shortSha} is a merge commit!`);
 
             mergeCommits++;
         }
@@ -59,5 +59,5 @@ export async function runner(): Promise<void> {
         return;
     }
 
-    log("No merge commits found in this pull request.", "info");
+    info("No merge commits found in this pull request.");
 }
