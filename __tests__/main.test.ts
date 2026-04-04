@@ -61,7 +61,7 @@ describe("nexusphp/no-merge-commits main", () => {
     it("fails when no token is provided", async () => {
         process.env["INPUT_TOKEN"] = "";
 
-        await expect(runner()).rejects.toThrowError("Input required and not supplied: token");
+        await expect(runner()).rejects.toThrow("Input required and not supplied: token");
         assertWritten(["Collecting token from input..."]);
     });
 
