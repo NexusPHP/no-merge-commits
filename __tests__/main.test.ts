@@ -1,5 +1,5 @@
-import * as core from "@actions/core";
-import * as github from "@actions/github";
+import { setFailed } from "@actions/core";
+import { getOctokit } from "@actions/github";
 import { EOL } from "os";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { runner } from "../src/runner.js";
@@ -33,8 +33,8 @@ vi.mock("@actions/core", async (importOriginal) => {
     };
 });
 
-const mockGetOctokit = vi.mocked(github.getOctokit);
-const mockSetFailed = vi.mocked(core.setFailed);
+const mockGetOctokit = vi.mocked(getOctokit);
+const mockSetFailed = vi.mocked(setFailed);
 
 describe("nexusphp/no-merge-commits main", () => {
     beforeEach(() => {
@@ -89,7 +89,7 @@ describe("nexusphp/no-merge-commits main", () => {
                     },
                 },
             },
-        } as unknown as ReturnType<typeof github.getOctokit>);
+        } as unknown as ReturnType<typeof getOctokit>);
 
         await expect(runner()).resolves.toBeUndefined();
 
@@ -138,7 +138,7 @@ describe("nexusphp/no-merge-commits main", () => {
                     },
                 },
             },
-        } as unknown as ReturnType<typeof github.getOctokit>);
+        } as unknown as ReturnType<typeof getOctokit>);
 
         await expect(runner()).resolves.toBeUndefined();
         expect(mockSetFailed).toHaveBeenCalledWith("1 merge commit was found in this pull request.");
