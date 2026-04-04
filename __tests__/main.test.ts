@@ -62,7 +62,7 @@ describe("nexusphp/no-merge-commits main", () => {
         process.env["INPUT_TOKEN"] = "";
 
         await expect(runner()).rejects.toThrowError("Input required and not supplied: token");
-        assertWritten(["::notice::Collecting token from input..."]);
+        assertWritten(["Collecting token from input..."]);
     });
 
     it("succeeds checking no merge commits", async () => {
@@ -94,17 +94,17 @@ describe("nexusphp/no-merge-commits main", () => {
         await expect(runner()).resolves.toBeUndefined();
 
         assertWritten([
-            "::notice::Collecting token from input...",
+            "Collecting token from input...",
             "Token collected.",
-            "::notice::Instantiating an Octokit client using token...",
+            "Instantiating an Octokit client using token...",
             "Octokit client is ready.",
             "::debug::Looking up owner: me",
             "::debug::Looking up repository: awesome",
             "::debug::Looking up pull request number: 1",
-            "::notice::Retrieving commits of PR #1...",
+            "Retrieving commits of PR #1...",
             "HTTP Status: 200",
             "PR #1 contains 1 commit.",
-            "::notice::Inspecting commit SHA: 819a33b",
+            "Inspecting commit SHA: 819a33b",
             "No merge commits found in this pull request.",
         ]);
     });
@@ -144,17 +144,17 @@ describe("nexusphp/no-merge-commits main", () => {
         expect(mockSetFailed).toHaveBeenCalledWith("1 merge commit was found in this pull request.");
 
         assertWritten([
-            "::notice::Collecting token from input...",
+            "Collecting token from input...",
             "Token collected.",
-            "::notice::Instantiating an Octokit client using token...",
+            "Instantiating an Octokit client using token...",
             "Octokit client is ready.",
             "::debug::Looking up owner: me",
             "::debug::Looking up repository: awesome",
             "::debug::Looking up pull request number: 1",
-            "::notice::Retrieving commits of PR #1...",
+            "Retrieving commits of PR #1...",
             "HTTP Status: 200",
             "PR #1 contains 1 commit.",
-            "::notice::Inspecting commit SHA: 819a33b",
+            "Inspecting commit SHA: 819a33b",
             "::error::Commit SHA 819a33b is a merge commit!",
         ]);
     });

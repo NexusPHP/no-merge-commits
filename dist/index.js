@@ -31786,7 +31786,7 @@ function warning(message, properties = {}) {
  * @param properties optional properties to add to the annotation.
  */
 function notice(message, properties = {}) {
-    command_issueCommand('notice', utils_toCommandProperties(properties), message instanceof Error ? message.toString() : message);
+    issueCommand('notice', toCommandProperties(properties), message instanceof Error ? message.toString() : message);
 }
 /**
  * Writes info to log with console.log.
@@ -36195,17 +36195,17 @@ function inflect(iterable, singular, plural) {
 
 const MERGE_COMMIT_PARENT_COUNT = 2;
 async function runner() {
-    notice("Collecting token from input...");
+    info("Collecting token from input...");
     const token = getInput("token", { required: true });
     info("Token collected.");
-    notice("Instantiating an Octokit client using token...");
+    info("Instantiating an Octokit client using token...");
     const client = getOctokit(token);
     info("Octokit client is ready.");
     const { owner, repo, number: pull_number } = github_context.issue;
     core_debug(`Looking up owner: ${owner}`);
     core_debug(`Looking up repository: ${repo}`);
     core_debug(`Looking up pull request number: ${pull_number}`);
-    notice(`Retrieving commits of PR #${pull_number}...`);
+    info(`Retrieving commits of PR #${pull_number}...`);
     const { data: commits, status: httpStatus } = await client.rest.pulls.listCommits({
         owner,
         repo,
@@ -36220,7 +36220,7 @@ async function runner() {
     let mergeCommits = 0;
     for (const { sha, parents } of commits) {
         const shortSha = sha.substring(0, 7);
-        notice(`Inspecting commit SHA: ${shortSha}`);
+        info(`Inspecting commit SHA: ${shortSha}`);
         if (parents.length >= MERGE_COMMIT_PARENT_COUNT) {
             error(`Commit SHA ${shortSha} is a merge commit!`);
             mergeCommits++;

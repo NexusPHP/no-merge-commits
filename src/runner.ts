@@ -1,15 +1,15 @@
-import { debug, error, getInput, info, notice, setFailed } from "@actions/core";
+import { debug, error, getInput, info, setFailed } from "@actions/core";
 import { context, getOctokit } from "@actions/github";
 import { inflect } from "./util.js";
 
 const MERGE_COMMIT_PARENT_COUNT = 2;
 
 export async function runner(): Promise<void> {
-    notice("Collecting token from input...");
+    info("Collecting token from input...");
     const token = getInput("token", { required: true });
     info("Token collected.");
 
-    notice("Instantiating an Octokit client using token...");
+    info("Instantiating an Octokit client using token...");
     const client = getOctokit(token);
     info("Octokit client is ready.");
 
@@ -18,7 +18,7 @@ export async function runner(): Promise<void> {
     debug(`Looking up repository: ${repo}`);
     debug(`Looking up pull request number: ${pull_number}`);
 
-    notice(`Retrieving commits of PR #${pull_number}...`);
+    info(`Retrieving commits of PR #${pull_number}...`);
 
     const { data: commits, status: httpStatus } = await client.rest.pulls.listCommits({
         owner,
@@ -40,7 +40,7 @@ export async function runner(): Promise<void> {
     for (const { sha, parents } of commits) {
         const shortSha = sha.substring(0, 7);
 
-        notice(`Inspecting commit SHA: ${shortSha}`);
+        info(`Inspecting commit SHA: ${shortSha}`);
 
         if (parents.length >= MERGE_COMMIT_PARENT_COUNT) {
             error(`Commit SHA ${shortSha} is a merge commit!`);
