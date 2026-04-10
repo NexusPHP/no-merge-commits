@@ -10,9 +10,7 @@ on:
   schedule:
     - cron: '0 0 * * *' # Run at 00:00 UTC
 
-permissions:
-  contents: read
-  pull-requests: write
+permissions: {}
 
 concurrency:
   group: check-dist
@@ -37,10 +35,10 @@ jobs:
         id: cache-npm
         uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
-          path: ~/.npm
-          key: ${{ github.job }}-npm-${{ hashFiles('**/package-lock.json') }}
+          path: node_modules
+          key: ${{ github.job }}-node-24-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ github.job }}-npm-
+            ${{ github.job }}-node-24-
 
       - name: List the state of dependencies
         if: steps.cache-npm.outputs.cache-hit != 'true'
@@ -69,7 +67,7 @@ jobs:
         if: steps.diff.outputs.DIFF == 'true'
         uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.RELEASE_ACTIONS_TOKEN }}
           commit-message: Update rebuilt distributable
           branch: update-build-dist
           delete-branch: true
