@@ -37,7 +37,7 @@
     "@eslint/js": "^10.0.1",
     "@octokit/tsconfig": "^4.0.0",
     "@types/node": "^26.0.1",
-    "@vercel/ncc": "^0.44.0",
+    "@vercel/ncc": "^0.44.1",
     "eslint": "^10.6.0",
     "jiti": "^2.7.0",
     "prettier": "^3.9.1",
